@@ -11,7 +11,9 @@ const helper  = {
     },
 
      eraseEvents() {
-         db.remove({});
+         db.remove({}, { multi: true }, (err, numRemoved) => {
+            console.log(numRemoved);
+         });
     },
 
     getAllEvents() {
@@ -26,14 +28,15 @@ const helper  = {
 
     // get all events recorded by an actor using the actor id
     getEventsByActorId(id) {
-        return new Promise ( (resolve, reject) => {db.find({ "actor.id": id }).sort({_id: 1}).exec((err, data) => {
+        return new Promise ( (resolve, reject) => {db.find({ "actor.id": Number.parseInt(id) }).sort({_id: 1}).exec((err, data) => {
           if (err) { 
               reject(err) 
           } else {
               resolve(data);
           }
         })})
- },
+    },
+
 }
 
 module.exports = helper;
