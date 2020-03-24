@@ -109,12 +109,26 @@ const helper  = {
           reject(err) 
       } else {
           const actors = data.map((x) => ({ actor:x.actor, created_at: x.created_at }));
+          const newActors = [];
+          const consec = 0
           actors.forEach(actor=>{
-            const actorData = actors.filter(x => x.id === actor.id); 
+            const actorData = actors.filter(x => x.actor.id === actor.actor.id); 
             // calculate streak for each actor
-            
+            const d1 = new Date(actorData[0].created_at);
+            const d2 = new Date(actorData[actorData.length-1].created_at);   
+            // calculate days streak          
+            const diffD = Number.parseInt((d1 - d2)/1000/60/60/24);
+            const notExists = newActors.every(actor => actor.id !== actorData[0].actor.id);
+                  if (notExists) { // check if actor data does not exists in new array
+                     // add if it doesn't exist
+                      newActors.push({
+                        ...actorData[0].actor,
+                        streak: diffD
+                      });
+                } 
           });
-          resolve(actors);
+          const result  = newActors.sort((a,b) => b.streak - a.streak).map((x) => { return { id: x.id, login: x.login, avatar_url: x.avatar_url}});
+          resolve(result);
       }
     })})
 },
