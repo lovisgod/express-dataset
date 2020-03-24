@@ -12,13 +12,17 @@ try {
 }
 };
 
-const addEvent = (req, res) => {
+const addEvent = async (req, res) => {
 	try {
-	 dbHelper.createEvents(req.body);
+	 await dbHelper.createEvents(req.body);
 	 return sendSuccessResponse(res, 201, 'Event successfully created');
 	} catch (error) {
-	   console.log(error);
-	   return sendErrorResponse(res, 500, { message:'An error occurred while creating event', error })
+	   if (error.errorType == 'uniqueViolated'){
+		return sendErrorResponse(res, 400, { message:'An error occurred while creating event', error:error.errorType })
+	   } else{
+		return sendErrorResponse(res, 500, { message:'An error occurred while creating event', error })
+	   }
+	  
 	}
  
 };
