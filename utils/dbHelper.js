@@ -1,7 +1,7 @@
 const DataStore = require('nedb');
 const date = require('date-and-time');
 const idGenerator = require('./idGenerator');
-const { sendErrorResponse, sendSuccessResponse } = require('./../utils/response');
+const { remove_id  } = require('./../utils/response');
 const db = new DataStore({ filename: './../datafile', autoload: true, timestampData: false });
 db.ensureIndex({ fieldName: 'id', unique: true }, function (err) {
 });
@@ -39,7 +39,8 @@ const helper  = {
              if (err) { 
                  reject(err) 
              } else {
-                 resolve(data);
+                 const result = remove_id(data);
+                 resolve(result);
              }
            })})
     },
@@ -50,7 +51,8 @@ const helper  = {
           if (err) { 
               reject(err) 
           } else {
-              resolve(data);
+             const result = remove_id(data);
+              resolve(result);
           }
         })})
     },
@@ -72,6 +74,50 @@ const helper  = {
        
     },
 
+
+    // get all actors
+    getAllActors() {
+        return new Promise ( (resolve, reject) => {db.find({}).sort({created_at: -1, "actor.login": -1}).exec((err, data) => {
+          if (err) { 
+              reject(err) 
+          } else {
+              const actors = data.map(x => x.actor);
+              const newActors = [];
+              actors.forEach(actor=>{
+                  const actorData = actors.filter(x => x.id === actor.id); // find all actors with same id from x data
+                  const actorevents = actorData.length; // determine logins by number of occurrences
+                  const notExists = newActors.every(actor => actor.id !== actorData[0].id);
+                  if (notExists) { // check if actor data does not exists in new array
+                     // add if it doesn't exist
+                      newActors.push({
+                        ...actorData[0],
+                        events: actorevents
+                      });
+                }  
+
+              })
+              const result  = newActors.sort((a,b) => b.events - a.events).map((x) => { return { id: x.id, login: x.login, avatar_url: x.avatar_url}});
+              resolve(result);
+          }
+        })})
+ },
+
+  // get all actors streak
+  getAllActorsStreak() {
+    return new Promise ( (resolve, reject) => {db.find({}).sort({created_at: -1, "actor.login": -1}).exec((err, data) => {
+      if (err) { 
+          reject(err) 
+      } else {
+          const actors = data.map((x) => ({ actor:x.actor, created_at: x.created_at }));
+          actors.forEach(actor=>{
+            const actorData = actors.filter(x => x.id === actor.id); 
+            // calculate streak for each actor
+            
+          });
+          resolve(actors);
+      }
+    })})
+},
 
 };
 

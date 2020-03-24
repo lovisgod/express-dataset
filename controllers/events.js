@@ -15,7 +15,7 @@ try {
 const addEvent = async (req, res) => {
 	try {
 	 await dbHelper.createEvents(req.body);
-	 return sendSuccessResponse(res, 201, 'Event successfully created');
+	 return sendSuccessResponse(res, 201, {});
 	} catch (error) {
 	   if (error.errorType == 'uniqueViolated'){
 		return sendErrorResponse(res, 400, { message:'An error occurred while creating event', error:error.errorType })
